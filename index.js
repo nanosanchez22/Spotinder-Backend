@@ -5,6 +5,8 @@ const cookieParser = require("cookie-parser");
 const cors = require("cors");
 require("dotenv").config();
 
+const spotinderRoutes = require("./routes/spotinderRoutes");
+
 // creamos el servidor con express
 const app = express();
 
@@ -15,6 +17,7 @@ app.use(cookieParser());
 app.use(cors());
 
 //rutas y recursos
+app.use("/api", spotinderRoutes);
 
 //levantar el servidor en un puerto
 const port = process.env.PORT || 8000;
