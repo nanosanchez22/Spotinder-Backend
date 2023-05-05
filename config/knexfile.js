@@ -5,7 +5,7 @@ const knex = require("knex")({
     port: 5432,
     user: "postgres",
     password: process.env.DB_PASSWORD,
-    database: "postgres",
+    database: "spotinder",
   },
 });
 
