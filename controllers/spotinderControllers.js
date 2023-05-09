@@ -49,14 +49,30 @@ exports.agregarCanciones = async (req, res) => {
 };
 
 exports.agregarPlaylists = async (req, res) => {
-  const { nombre, descripcion, usuario_id } = req.body;
+  const { nombre, descripcion } = req.body;
+  console.log(req.user);
+  console.log(req.user.id);
+  const { id: usuario_id } = req.user;
   try {
-    const resultado = await knex("canciones").insert({
+    const resultado = await knex("playlists").insert({
       nombre,
       descripcion,
       usuario_id, // no se como pasarle bien el usuario_id, seguramente despues del logIn se guarde el usuario, por ahora lo pongo manual
     });
-    res.status(200).json({ message: "Se creo la cancion correctamente" });
+    res.status(200).json({ message: "Se creo la playlist correctamente" });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.agregarCancionesAPlaylist = async (req, res) => {
+  const { playlist_id, cancion_id } = req.body; // Supongo q se le pasa playlist_id y cancion_id por el front
+  try {
+    const resultado = await knex("playlist_canciones").insert({
+      playlist_id,
+      cancion_id,
+    });
+    res.status(200).json({ message: "Se agrego correctamente la cancion" });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -82,10 +98,22 @@ exports.registroUsuario = async (req, res) => {
 };
 
 exports.loginUsuario = async (req, res) => {
-  const { usuario, email, contraseña } = req.body;
+  const { usuario, contraseña } = req.body;
   console.log(usuario, contraseña);
-  knex("usuarios")
-    .where({ usuario: usuario || email })
+  //if usuario formato mail con regex
+  //nueva parte
+  let query = knex("usuarios");
+
+  // Check si el input esta en formato email
+  if (/^\S+@\S+\.\S+$/.test(usuario)) {
+    query = query.where({ email: usuario });
+  } else {
+    query = query.where({ usuario: usuario });
+  }
+
+  /* knex("usuarios")
+    .where({ usuario: usuario }) */
+  query
     .then(async (resultado) => {
       if (!resultado.length) {
         res
@@ -107,6 +135,7 @@ exports.loginUsuario = async (req, res) => {
       const token = jwt.sign(
         {
           usuario: resultado[0].usuario,
+          id: resultado[0].id,
         },
         process.env.TOKEN_SECRET
       );
