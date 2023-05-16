@@ -53,12 +53,21 @@ exports.agregarPlaylists = async (req, res) => {
   console.log(req.user);
   console.log(req.user.id);
   const { id: usuario_id } = req.user;
+
+  const { playlist_id, arrayCanciones } = req.body;
+
   try {
     const resultado = await knex("playlists").insert({
-      nombre,
-      descripcion,
+      nombre: "Playlist Generada",
+      descripcion: "Mi playlist",
       usuario_id, // no se como pasarle bien el usuario_id, seguramente despues del logIn se guarde el usuario, por ahora lo pongo manual
     });
+
+    const resultado2 = await knex("playlist_canciones").insert({
+      playlist_id,
+      arrayCanciones,
+    });
+
     res.status(200).json({ message: "Se creo la playlist correctamente" });
   } catch (error) {
     res.status(400).json({ error: error.message });
